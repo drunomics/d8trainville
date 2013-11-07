@@ -1,0 +1,22 @@
+# Environment variables.
+---
+
+project: "d8trainville"
+nodes:
+  webserver:
+    tags:                             # List of ansible tags
+      - main
+      - drush
+      - apache
+      - mysql
+      - debugging
+      - phpmyadmin
+    memory: 2048                      # Default VM memory.
+    cpus: 4                           # Default Number of CPUs.
+    ip: "192.168.33.23"              # Default private network address.
+    verbose: false                    # Make output verbose?
+    ports: []                         # Allows ports to be forwarded from the host to the guest.
+    shares:                           # List of shared folders.
+      - name: "web"                   # Unique identifier of the share.
+        host: "../web"                # Path on the host (relative to the Vagrantfile).
+        guest: "/var/www"             # Path on the guest.
