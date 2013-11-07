@@ -28,6 +28,7 @@ enabled:
   options: 0
   overlay: 0
   path: 0
+  picture: 0
   rdf: 0
   search: 0
   shortcut: 0

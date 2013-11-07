@@ -5,25 +5,28 @@ bundle: article
 mode: default
 content:
   body:
-    label: hidden
     type: text_default
-    weight: 11
+    weight: '11'
     settings: {  }
+    label: hidden
   field_tags:
     type: taxonomy_term_reference_link
     weight: '10'
+    settings: {  }
     label: above
-    settings: {  }
   field_image:
-    label: hidden
-    type: image
-    settings:
-      image_style: large
-      image_link: ''
+    type: picture
     weight: '-1'
-  comment:
+    settings:
+      picture_mapping: test
+      fallback_image_style: ''
+      image_link: file
     label: hidden
+  comment:
     type: comment_default
-    weight: 20
+    weight: '20'
     settings: {  }
+    label: hidden
+  langcode:
+    visible: false
 status: 1

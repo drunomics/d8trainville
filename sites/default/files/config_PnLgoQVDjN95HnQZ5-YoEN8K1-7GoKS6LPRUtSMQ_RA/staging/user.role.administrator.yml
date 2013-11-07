@@ -99,5 +99,6 @@ permissions:
   - 'select account cancellation method'
   - 'administer views'
   - 'access all views'
+  - 'administer pictures'
 status: true
 langcode: en

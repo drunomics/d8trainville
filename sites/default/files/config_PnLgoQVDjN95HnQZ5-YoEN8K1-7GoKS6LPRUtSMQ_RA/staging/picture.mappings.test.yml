@@ -1,0 +1,13 @@
+id: test
+uuid: ee8308ad-3581-4ba3-8300-fce97f38d19a
+label: Test
+mappings:
+  module.toolbar.narrow:
+    1x: thumbnail
+  module.toolbar.standard:
+    1x: medium
+  module.toolbar.wide:
+    1x: large
+breakpointGroup: module.toolbar.toolbar
+status: true
+langcode: en
