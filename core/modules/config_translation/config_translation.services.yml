@@ -1,0 +1,20 @@
+services:
+  config_translation.route_subscriber:
+    class: Drupal\config_translation\Routing\RouteSubscriber
+    arguments: ['@plugin.manager.config_translation.mapper']
+    tags:
+      - { name: event_subscriber }
+
+  config_translation.access_check:
+    class: Drupal\config_translation\Access\ConfigNameCheck
+    arguments: ['@plugin.manager.config_translation.mapper']
+    tags:
+      - { name: access_check }
+
+  plugin.manager.config_translation.mapper:
+    class: Drupal\config_translation\ConfigMapperManager
+    arguments:
+      - '@cache.cache'
+      - '@language_manager'
+      - '@module_handler'
+      - '@config.typed'
