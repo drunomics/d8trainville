@@ -4,7 +4,7 @@ weight: '-5'
 status: '0'
 langcode: en
 theme: bartik
-region: '-1'
+region: -1
 plugin: system_breadcrumb_block
 settings:
   label: Breadcrumbs

@@ -1,0 +1,16 @@
+id: node.project.body
+uuid: c9a74610-4446-4d0d-8727-39e1b03fd037
+status: true
+langcode: en
+field_uuid: fb5491b1-b0cc-46da-af00-c3953f267e70
+entity_type: node
+bundle: project
+label: Body
+description: ''
+required: false
+default_value: {  }
+default_value_function: ''
+settings:
+  display_summary: true
+  text_processing: '1'
+field_type: text_with_summary

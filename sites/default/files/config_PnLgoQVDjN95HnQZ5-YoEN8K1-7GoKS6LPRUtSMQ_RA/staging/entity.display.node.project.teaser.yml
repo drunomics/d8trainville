@@ -1,0 +1,13 @@
+id: node.project.teaser
+uuid: b323d12a-e37b-4aaa-9b06-6e3d5e832d68
+targetEntityType: node
+bundle: project
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 0
+    settings:
+      trim_length: '600'
+status: true
