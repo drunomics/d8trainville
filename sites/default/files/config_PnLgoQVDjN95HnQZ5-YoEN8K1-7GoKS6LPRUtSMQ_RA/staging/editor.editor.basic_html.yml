@@ -9,6 +9,7 @@ settings:
           items:
             - Bold
             - Italic
+            - Underline
         -
           name: Linking
           items:
