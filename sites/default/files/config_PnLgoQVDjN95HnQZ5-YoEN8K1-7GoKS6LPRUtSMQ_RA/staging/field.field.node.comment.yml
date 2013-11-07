@@ -1,0 +1,14 @@
+id: node.comment
+uuid: 9ddc1a1d-6336-4509-8903-3b5a76ea3624
+status: true
+langcode: en
+name: comment
+entity_type: node
+type: comment
+settings: {  }
+module: comment
+active: true
+locked: false
+cardinality: 1
+translatable: '0'
+indexes: {  }

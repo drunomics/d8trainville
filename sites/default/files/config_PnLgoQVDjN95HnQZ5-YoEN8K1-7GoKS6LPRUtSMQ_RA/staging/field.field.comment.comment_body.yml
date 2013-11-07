@@ -1,0 +1,14 @@
+id: comment.comment_body
+uuid: ced2e538-1951-4eda-8700-c455040a4729
+status: true
+langcode: en
+name: comment_body
+entity_type: comment
+type: text_long
+settings: {  }
+module: text
+active: true
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }

@@ -1,0 +1,16 @@
+id: user.user.compact
+uuid: f62f7c16-f1fd-4935-b742-6662ac64636c
+targetEntityType: user
+bundle: user
+mode: compact
+content:
+  user_picture:
+    label: hidden
+    type: image
+    settings:
+      image_style: thumbnail
+      image_link: content
+    weight: 0
+  member_for:
+    visible: false
+status: true
