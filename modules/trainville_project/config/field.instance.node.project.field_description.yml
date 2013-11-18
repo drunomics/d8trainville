@@ -1,7 +1,6 @@
 id: node.project.field_description
 status: true
 langcode: en
-field_uuid: 4ab2e063-5740-441e-b900-e92bc647675a
 entity_type: node
 bundle: project
 label: Description

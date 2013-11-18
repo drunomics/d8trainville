@@ -1,7 +1,6 @@
 id: node.project.field_screenshots
 status: true
 langcode: en
-field_uuid: ccd2be4d-ba07-438c-a131-49e2e9049ed8
 entity_type: node
 bundle: project
 label: Screenshots

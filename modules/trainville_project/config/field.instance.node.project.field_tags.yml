@@ -1,7 +1,6 @@
 id: node.project.field_tags
 status: true
 langcode: en
-field_uuid: 60db47f4-54fb-4c86-a439-5769fbda4bd1
 entity_type: node
 bundle: project
 label: Tags
