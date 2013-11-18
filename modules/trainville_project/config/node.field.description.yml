@@ -1,0 +1,14 @@
+id: node.field_description
+uuid: 5fe70976-1fdb-416b-aa00-d2bdf25a6a12
+status: true
+langcode: en
+name: field_description
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+active: truea
+locked: false
+cardinality: '1'
+translatable: false
+indexes: {  }
