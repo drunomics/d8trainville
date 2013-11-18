@@ -10,3 +10,4 @@ default_value: {  }
 default_value_function: ''
 settings: {  }
 field_type: taxonomy_term_reference
+field_name: field_tags

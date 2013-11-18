@@ -25,3 +25,4 @@ settings:
     width: null
     height: null
 field_type: image
+field_name: field_screenshots

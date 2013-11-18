@@ -12,3 +12,4 @@ settings:
   text_processing: '1'
   display_summary: 0
 field_type: text_with_summary
+field_name: field_description
