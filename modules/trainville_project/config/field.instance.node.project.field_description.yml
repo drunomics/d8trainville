@@ -1,0 +1,16 @@
+id: node.project.field_description
+uuid: 343ebd20-acf5-4658-8141-6525484798e7
+status: true
+langcode: en
+field_uuid: 4ab2e063-5740-441e-b900-e92bc647675a
+entity_type: node
+bundle: project
+label: Description
+description: ''
+required: 1
+default_value: {  }
+default_value_function: ''
+settings:
+  text_processing: '1'
+  display_summary: 0
+field_type: text_with_summary

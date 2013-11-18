@@ -1,0 +1,29 @@
+id: node.project.field_screenshots
+uuid: 87a1cd66-68ce-455d-8f41-657dc469b4e1
+status: true
+langcode: en
+field_uuid: ccd2be4d-ba07-438c-a131-49e2e9049ed8
+entity_type: node
+bundle: project
+label: Screenshots
+description: ''
+required: 0
+default_value: {  }
+default_value_function: ''
+settings:
+  file_directory: screenshots
+  file_extensions: 'png gif jpg jpeg'
+  max_filesize: 2MB
+  max_resolution: 2000x2000
+  min_resolution: 200x200
+  alt_field: 1
+  alt_field_required: 1
+  title_field: 1
+  title_field_required: 0
+  default_image:
+    fid: null
+    alt: ''
+    title: ''
+    width: null
+    height: null
+field_type: image
