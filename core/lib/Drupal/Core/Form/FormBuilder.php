@@ -419,6 +419,7 @@ class FormBuilder implements FormBuilderInterface {
       'rebuild',
       'rebuild_info',
       'redirect',
+      'redirect_route',
       'no_redirect',
       'temporary',
       // Internal properties defined by form processing.
@@ -476,21 +477,6 @@ class FormBuilder implements FormBuilderInterface {
   public function retrieveForm($form_id, &$form_state) {
     // Record the $form_id.
     $form_state['build_info']['form_id'] = $form_id;
-
-    // Record the filepath of the include file containing the original form, so
-    // the form builder callbacks can be loaded when the form is being rebuilt
-    // from cache on a different path (such as 'system/ajax'). See
-    // self::getCache(). Don't do this in maintenance mode as Drupal may not be
-    // fully bootstrapped (i.e. during installation) in which case
-    // menu_get_item() is not available.
-    if (!isset($form_state['build_info']['files']['menu']) && !defined('MAINTENANCE_MODE')) {
-      $item = $this->menuGetItem();
-      if (!empty($item['include_file'])) {
-        // Do not use form_load_include() here, as the file is already loaded.
-        // Anyway, self::getCache() is able to handle filepaths too.
-        $form_state['build_info']['files']['menu'] = $item['include_file'];
-      }
-    }
 
     // We save two copies of the incoming arguments: one for modules to use
     // when mapping form ids to constructor functions, and another to pass to
@@ -640,7 +626,7 @@ class FormBuilder implements FormBuilderInterface {
             $batch['form_state'] = $form_state;
           }
           else {
-            $batch['form_state'] = array_intersect_key($form_state, array_flip(array('programmed', 'rebuild', 'storage', 'no_redirect', 'redirect')));
+            $batch['form_state'] = array_intersect_key($form_state, array_flip(array('programmed', 'rebuild', 'storage', 'no_redirect', 'redirect', 'redirect_route')));
           }
 
           $batch['progressive'] = !$form_state['programmed'];
@@ -1698,15 +1684,6 @@ class FormBuilder implements FormBuilderInterface {
    */
   protected function drupalInstallationAttempted() {
     return drupal_installation_attempted();
-  }
-
-  /**
-   * Wraps menu_get_item().
-   *
-   * @return array|bool
-   */
-  protected function menuGetItem() {
-    return menu_get_item();
   }
 
   /**

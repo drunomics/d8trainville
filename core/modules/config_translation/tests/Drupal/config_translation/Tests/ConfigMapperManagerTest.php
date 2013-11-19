@@ -5,7 +5,7 @@
  * Contains \Drupal\config_translation\Tests\ConfigMapperManagerTest.
  */
 
-namespace Drupal\config_translation\Tests;
+namespace Drupal\config_translation\Tests {
 
 use Drupal\config_translation\ConfigMapperManager;
 use Drupal\Core\Language\Language;
@@ -63,7 +63,7 @@ class ConfigMapperManagerTest extends UnitTestCase {
       ->with()
       ->will($this->returnValue(array()));
 
-    $this->configMapperManager = new ConfigMapperManager(
+    $this->configMapperManager = new TestConfigMapperManager(
       $this->getMock('Drupal\Core\Cache\CacheBackendInterface'),
       $language_manager,
       $module_handler,
@@ -186,4 +186,28 @@ class ConfigMapperManagerTest extends UnitTestCase {
     return $nested_element;
   }
 
+}
+
+/**
+ * Subclass of the tested class to avoid global function calls.
+ *
+ * @todo Remove this once https://drupal.org/node/2109287 is fixed in core.
+ */
+class TestConfigMapperManager extends ConfigMapperManager {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getThemeList($refresh = FALSE) {
+    return array();
+  }
+}
+
+}
+
+// @todo Remove this once https://drupal.org/node/2109287 is fixed in core.
+namespace {
+  if (!function_exists('drupal_get_path')) {
+    function drupal_get_path() {}
+  }
 }

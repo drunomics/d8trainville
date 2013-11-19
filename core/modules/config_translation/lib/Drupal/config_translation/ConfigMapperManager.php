@@ -64,12 +64,9 @@ class ConfigMapperManager extends DefaultPluginManager implements ConfigMapperMa
     foreach ($module_handler->getModuleList() as $module => $filename) {
       $directories[$module] = dirname($filename);
     }
-    /*
-    @todo Restore once we figure out how to best unit test this.
-      Also needs test coverage (adding a .yml to a theme).
-    foreach (list_themes() as $theme) {
+    foreach ($this->getThemeList() as $theme) {
       $directories[$theme->name] = drupal_get_path('theme', $theme->name);
-    }*/
+    }
 
     // Check for files named MODULE.config_translation.yml and
     // THEME.config_translation.yml in module/theme roots.
@@ -82,6 +79,23 @@ class ConfigMapperManager extends DefaultPluginManager implements ConfigMapperMa
     // Let others alter definitions with hook_config_translation_info_alter().
     $this->alterInfo($module_handler, 'config_translation_info');
     $this->setCacheBackend($cache_backend, $language_manager, 'config_translation_info_plugins');
+  }
+
+  /**
+   * Returns the list of themes on the site.
+   *
+   * @param bool $refresh
+   *   Whether to refresh the cached theme list.
+   *
+   * @return array
+   *   An associative array of the currently available themes. The keys are the
+   *   themes' machine names and the values are objects. See list_themes() for
+   *   documentation on those objects.
+   *
+   * @todo Remove this once https://drupal.org/node/2109287 is fixed in core.
+   */
+  protected function getThemeList($refresh = FALSE) {
+    return list_themes($refresh);
   }
 
   /**

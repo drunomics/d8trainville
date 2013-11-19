@@ -5,7 +5,6 @@
  * Configuration Translation module.
  */
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\config_translation\Plugin\Derivative\ConfigTranslationLocalTasks;
 use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -37,31 +36,12 @@ function config_translation_help($path) {
  */
 function config_translation_menu() {
   $items = array();
-
   $items['admin/config/regional/config-translation'] = array(
     'title' => 'Configuration translation',
     'description' => 'Translate the configuration.',
     'route_name' => 'config_translation.mapper_list',
     'weight' => 30,
   );
-
-  // Generate translation tabs for keys where a specific path can be
-  // determined. This makes it possible to use translation features in-context
-  // of the administration experience.
-  $mappers = \Drupal::service('plugin.manager.config_translation.mapper')->getMappers();
-  /** @var $mappers \Drupal\config_translation\ConfigMapperInterface[] */
-  foreach ($mappers as $mapper) {
-    $path = $mapper->getRoute()->getPath();
-    $items[$path . '/translate'] = array(
-      'title callback' => 'config_translation_item_title',
-      'title arguments' => array(Unicode::strtolower($mapper->getTypeName())),
-      'route_name' => $mapper->getRouteName(),
-      'context' => MENU_CONTEXT_INLINE,
-      'weight' => 100,
-      'type' => MENU_SIBLING_LOCAL_TASK,
-    );
-  }
-
   return $items;
 }
 
@@ -75,19 +55,6 @@ function config_translation_permission() {
       'description' => t('Translate any configuration not shipped with modules and themes.'),
     ),
   );
-}
-
-/**
- * Translation tab title callback.
- *
- * @param string $type_name
- *   Type name to be included in title.
- *
- * @return string
- *   The translated title.
- */
-function config_translation_item_title($type_name) {
-  return t('Translate @title', array('@title' => $type_name));
 }
 
 /**
@@ -122,13 +89,13 @@ function config_translation_config_translation_info(&$info) {
         // Ignore non-existent routes.
       }
 
-      // Make sure entity type is fieldable and has base path.
-      if ($entity_info['fieldable'] && isset($entity_info['route_base_path']) && !empty($base_route)) {
+      // Make sure entity type is fieldable and has a base route.
+      if ($entity_info['fieldable'] && !empty($base_route)) {
         $info[$entity_type . '_fields'] = array(
           'base_route_name' => 'field_ui.instance_edit_' . $entity_type,
           'entity_type' => 'field_instance',
-          'title' => t('!label field'),
-          'class' => '\Drupal\config_translation\ConfigEntityMapper',
+          'title' => '!label field',
+          'class' => '\Drupal\config_translation\ConfigFieldInstanceMapper',
           'base_entity_type' => $entity_type,
           'list_controller' => '\Drupal\config_translation\Controller\ConfigTranslationFieldInstanceListController',
           'weight' => 10,
@@ -146,28 +113,17 @@ function config_translation_config_translation_info(&$info) {
       !isset($entity_info['links']['edit-form'])
     ) {
       // Do not record this entity mapper if the entity type does not
-      // provide a base path. We'll surely not be able to do anything with
+      // provide a base route. We'll surely not be able to do anything with
       // it anyway. Configuration entities with a dynamic base path, such as
       // field instances, need special treatment. See above.
       continue;
     }
 
-    $base_path = $entity_info['links']['edit-form'];
-    $collection = $route_provider->getRoutesByPattern('/' . $base_path);
-    // If there are no routes that match this path, we cannot instantiate the
-    // mapper plugin later. We'll not be able to attach the translate route.
-    if ($collection->count() != 1) {
-      continue;
-    }
-    $base_route_name = key($collection->getIterator());
-
     // Use the entity type as the plugin ID.
     $info[$entity_type] = array(
       'class' => '\Drupal\config_translation\ConfigEntityMapper',
-      'base_route_name' => $base_route_name,
-      // Set title unescaped. It is later escaped for display. The !label
-      // gets replaced later on when the entity instance is set.
-      'title' => t('!label !entity_type', array('!entity_type' => Unicode::strtolower($entity_info['label']))),
+      'base_route_name' => $entity_info['links']['edit-form'],
+      'title' => '!label !entity_type',
       'names' => array(),
       'entity_type' => $entity_type,
       'weight' => 10,

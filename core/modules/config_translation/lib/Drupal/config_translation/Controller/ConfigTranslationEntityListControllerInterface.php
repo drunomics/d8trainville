@@ -7,10 +7,12 @@
 
 namespace Drupal\config_translation\Controller;
 
+use Drupal\Core\Entity\EntityListControllerInterface;
+
 /**
  * Defines an interface for configuration translation entity list controllers.
  */
-interface ConfigTranslationEntityListControllerInterface {
+interface ConfigTranslationEntityListControllerInterface extends EntityListControllerInterface {
 
   /**
    * Sorts an array by value.

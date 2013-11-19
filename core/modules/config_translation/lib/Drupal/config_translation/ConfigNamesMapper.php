@@ -20,9 +20,6 @@ use Symfony\Component\Routing\Route;
 
 /**
  * Configuration mapper base implementation.
- *
- * The configuration mappers are stored on the route, which gets serialized in
- * the 'route' column of {router}.
  */
 class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, ContainerFactoryPluginInterface {
 
@@ -55,12 +52,27 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
   protected $baseRoute;
 
   /**
+   * The language code of the language this mapper, if any.
+   *
+   * @var string|null
+   */
+  protected $langcode = NULL;
+
+  /**
    * Constructs a ConfigNamesMapper.
    *
    * @param $plugin_id
    *   The config mapper plugin ID.
    * @param array $plugin_definition
-   *   An array of definitions with mapper details.
+   *   An array of plugin information with the following keys:
+   *   - title: The title of the mapper, used for generating page titles.
+   *   - base_route_name: The route name of the base route this mapper is
+   *     attached to.
+   *   - names: (optional) An array of configuration names.
+   *   - weight: (optional) The weight of this mapper, used in mapper listings.
+   *     Defaults to 20.
+   *   - list_controller: (optional) Class name for list controller used to
+   *     generate lists of this type of configuration.
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The configuration factory.
    * @param \Drupal\locale\LocaleConfigManager $locale_config_manager
@@ -83,6 +95,7 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
     $this->configFactory = $config_factory;
     $this->localeConfigManager = $locale_config_manager;
     $this->configMapperManager = $config_mapper_manager;
+
     $this->setTranslationManager($translation_manager);
 
     $this->baseRoute = $route_provider->getRouteByName($this->getBaseRouteName());
@@ -109,7 +122,9 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
    * {@inheritdoc}
    */
   public function getTitle() {
-    return $this->pluginDefinition['title'];
+    // A title from a *.config_translation.yml. Should be translated for
+    // display in the current page language.
+    return $this->t($this->pluginDefinition['title']);
   }
 
   /**
@@ -122,6 +137,13 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
   /**
    * {@inheritdoc}
    */
+  public function getBaseRouteParameters() {
+    return array();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getBaseRoute() {
     return $this->baseRoute;
   }
@@ -129,41 +151,147 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
   /**
    * {@inheritdoc}
    */
-  public function getRouteName() {
-    return 'config_translation.item.' . $this->getBaseRouteName();
+  public function getBasePath() {
+    return $this->getPathFromRoute($this->getBaseRoute(), $this->getBaseRouteParameters());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRouteParameters() {
-    return array();
+  public function getOverviewRouteName() {
+    return 'config_translation.item.overview.' . $this->getBaseRouteName();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRoute() {
-    return new Route($this->getBaseRoute()->getPath() . '/translate',
+  public function getOverviewRouteParameters() {
+    return $this->getBaseRouteParameters();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOverviewRoute() {
+    return new Route(
+      $this->getBaseRoute()->getPath() . '/translate',
       array(
         '_controller' => '\Drupal\config_translation\Controller\ConfigTranslationController::itemPage',
-        'mapper_plugin' => array(
-          'plugin_id' => $this->getPluginId(),
-          'plugin_definition' => $this->getPluginDefinition(),
-        ),
+        'plugin_id' => $this->getPluginId(),
       ),
-      array(
-        '_config_translation_config_name_access' => 'TRUE',
-      )
+      array('_config_translation_overview_access' => 'TRUE')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getBasePath() {
-    $path = $this->getBaseRoute()->getPath();
-    foreach ($this->getRouteParameters() as $key => $value) {
+  public function getOverviewPath() {
+    return $this->getPathFromRoute($this->getOverviewRoute(), $this->getOverviewRouteParameters());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAddRouteName() {
+    return 'config_translation.item.add.' . $this->getBaseRouteName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAddRouteParameters() {
+    // If sub-classes provide route parameters in getBaseRouteParameters(), they
+    // probably also want to provide those for the add, edit, and delete forms.
+    $parameters = $this->getBaseRouteParameters();
+    $parameters['langcode'] = $this->langcode;
+    return $parameters;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAddRoute() {
+    return new Route(
+      $this->getBaseRoute()->getPath() . '/translate/{langcode}/add',
+      array(
+        '_form' => '\Drupal\config_translation\Form\ConfigTranslationAddForm',
+        'plugin_id' => $this->getPluginId(),
+      ),
+      array('_config_translation_form_access' => 'TRUE')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditRouteName() {
+    return 'config_translation.item.edit.' . $this->getBaseRouteName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditRouteParameters() {
+    return $this->getAddRouteParameters();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditRoute() {
+    return new Route(
+      $this->getBaseRoute()->getPath() . '/translate/{langcode}/edit',
+      array(
+        '_form' => '\Drupal\config_translation\Form\ConfigTranslationEditForm',
+        'plugin_id' => $this->getPluginId(),
+      ),
+      array('_config_translation_form_access' => 'TRUE')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDeleteRouteName() {
+    return 'config_translation.item.delete.' . $this->getBaseRouteName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDeleteRouteParameters() {
+    return $this->getAddRouteParameters();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDeleteRoute() {
+    return new Route(
+      $this->getBaseRoute()->getPath() . '/translate/{langcode}/delete',
+      array(
+        '_form' => '\Drupal\config_translation\Form\ConfigTranslationDeleteForm',
+        'plugin_id' => $this->getPluginId(),
+      ),
+      array('_config_translation_form_access' => 'TRUE')
+    );
+  }
+
+  /**
+   * Gets the path for a certain route, given a set of route parameters.
+   *
+   * @param \Symfony\Component\Routing\Route $route
+   *   The route object.
+   * @param array $parameters
+   *   An array of route parameters.
+   *
+   * @return string
+   *   Processed path with placeholders replaced.
+   */
+  public function getPathFromRoute(Route $route, array $parameters) {
+    $path = $route->getPath();
+    foreach ($parameters as $key => $value) {
       $path = str_replace('{' . $key . '}', $value, $path);
     }
     return $path;
@@ -194,7 +322,12 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
    * {@inheritdoc}
    */
   public function populateFromRequest(Request $request) {
-    // A name mapper is fully populated without request data.
+    if ($request->attributes->has('langcode')) {
+      $this->langcode = $request->attributes->get('langcode');
+    }
+    else {
+      $this->langcode = NULL;
+    }
   }
 
   /**
@@ -293,7 +426,7 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
    * {@inheritdoc}
    */
   public function getTypeName() {
-    return t('Settings');
+    return $this->t('Settings');
   }
 
   /**
@@ -303,9 +436,16 @@ class ConfigNamesMapper extends PluginBase implements ConfigMapperInterface, Con
     return array(
       'translate' => array(
         'title' => $this->t('Translate'),
-        'href' => $this->getBasePath() . '/translate',
+        'href' => $this->getOverviewPath(),
       ),
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContextualLinkGroup() {
+    return NULL;
   }
 
 }

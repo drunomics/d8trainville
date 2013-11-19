@@ -32,6 +32,13 @@ interface ConfigMapperInterface {
   public function getBaseRouteName();
 
   /**
+   * Returns the route parameters for the base route the mapper is attached to.
+   *
+   * @return array
+   */
+  public function getBaseRouteParameters();
+
+  /**
    * Returns the base route object the mapper is attached to.
    *
    * @return \Symfony\Component\Routing\Route
@@ -40,35 +47,112 @@ interface ConfigMapperInterface {
   public function getBaseRoute();
 
   /**
-   * Returns route name for the mapper.
-   *
-   * @return string
-   *   Route name for the mapper.
-   */
-  public function getRouteName();
-
-  /**
-   * Returns the route parameters for the translation route.
-   *
-   * @return array
-   */
-  public function getRouteParameters();
-
-  /**
-   * Returns the route object for a translation page.
-   *
-   * @return \Symfony\Component\Routing\Route
-   *   The route object for the translation page.
-   */
-  public function getRoute();
-
-  /**
-   * Returns a processed path for the base page.
+   * Returns a processed path for the base route the mapper is attached to.
    *
    * @return string
    *   Processed path with placeholders replaced.
    */
   public function getBasePath();
+
+  /**
+   * Returns route name for the translation overview route.
+   *
+   * @return string
+   *   Route name for the mapper.
+   */
+  public function getOverviewRouteName();
+
+  /**
+   * Returns the route parameters for the translation overview route.
+   *
+   * @return array
+   */
+  public function getOverviewRouteParameters();
+
+  /**
+   * Returns the route object for a translation overview route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route object for the translation page.
+   */
+  public function getOverviewRoute();
+
+  /**
+   * Returns a processed path for the translation overview route.
+   *
+   * @return string
+   *   Processed path with placeholders replaced.
+   */
+  public function getOverviewPath();
+
+  /**
+   * Returns route name for the translation add form route.
+   *
+   * @return string
+   *   Route name for the mapper.
+   */
+  public function getAddRouteName();
+
+  /**
+   * Returns the route parameters for the translation add form route.
+   *
+   * @return array
+   */
+  public function getAddRouteParameters();
+
+  /**
+   * Returns the route object for a translation add form route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route object for the translation page.
+   */
+  public function getAddRoute();
+
+  /**
+   * Returns route name for the translation edit form route.
+   *
+   * @return string
+   *   Route name for the mapper.
+   */
+  public function getEditRouteName();
+
+  /**
+   * Returns the route parameters for the translation edit form route.
+   *
+   * @return array
+   */
+  public function getEditRouteParameters();
+
+  /**
+   * Returns the route object for a translation edit form route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route object for the translation page.
+   */
+  public function getEditRoute();
+
+  /**
+   * Returns route name for the translation deletion route.
+   *
+   * @return string
+   *   Route name for the mapper.
+   */
+  public function getDeleteRouteName();
+
+  /**
+   * Returns the route parameters for the translation deletion route.
+   *
+   * @return array
+   */
+  public function getDeleteRouteParameters();
+
+  /**
+   * Returns the route object for the translation deletion route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The route object for the translation page.
+   */
+  public function getDeleteRoute();
 
   /**
    * Returns an array of configuration names for the mapper.
@@ -192,5 +276,13 @@ interface ConfigMapperInterface {
    *   Page request object.
    */
   public function populateFromRequest(Request $request);
+
+  /**
+   * Returns the name of the contextual link group to add contextual links to.
+   *
+   * @return string|null
+   *   A contextual link group name or null if no link should be added.
+   */
+  public function getContextualLinkGroup();
 
 }

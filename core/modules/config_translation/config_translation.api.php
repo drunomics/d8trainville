@@ -33,20 +33,34 @@
  * @see \Drupal\config_translation\Routing\RouteSubscriber::routes()
  */
 function hook_config_translation_info(&$info) {
-  // Add fields entity mappers to all fieldable entity types defined.
   $entity_manager = \Drupal::entityManager();
-  foreach ($entity_manager->getDefinitions() as $entity_type => $entity_info) {
-    // Make sure entity type is fieldable and has base path.
-    if ($entity_info['fieldable'] && isset($entity_info['route_base_path'])) {
-      $info[$entity_type . '_fields'] = array(
-        'base_path' => $entity_info['route_base_path'] . '/fields/{field_instance}',
-        'route_name' => 'config_translation.item.field_ui.instance_edit_' . $entity_type,
-        'entity_type' => 'field_instance',
-        'title' => t('!label field'),
-        'class' => '\Drupal\config_translation\ConfigEntityMapper',
-        'base_entity_type' => $entity_type,
-        'list_controller' => '\Drupal\config_translation\Controller\ConfigTranslationFieldInstanceListController',
-      );
+  $route_provider = \Drupal::service('router.route_provider');
+
+  // If field UI is not enabled, the base routes of the type
+  // "field_ui.instance_edit_$entity_type" are not defined.
+  if (\Drupal::moduleHandler()->moduleExists('field_ui')) {
+    // Add fields entity mappers to all fieldable entity types defined.
+    foreach ($entity_manager->getDefinitions() as $entity_type => $entity_info) {
+      $base_route = NULL;
+      try {
+        $base_route = $route_provider->getRouteByName('field_ui.instance_edit_' . $entity_type);
+      }
+      catch (RouteNotFoundException $e) {
+        // Ignore non-existent routes.
+      }
+
+      // Make sure entity type is fieldable and has a base route.
+      if ($entity_info['fieldable'] && !empty($base_route)) {
+        $info[$entity_type . '_fields'] = array(
+          'base_route_name' => 'field_ui.instance_edit_' . $entity_type,
+          'entity_type' => 'field_instance',
+          'title' => t('!label field'),
+          'class' => '\Drupal\config_translation\ConfigFieldInstanceMapper',
+          'base_entity_type' => $entity_type,
+          'list_controller' => '\Drupal\config_translation\Controller\ConfigTranslationFieldInstanceListController',
+          'weight' => 10,
+        );
+      }
     }
   }
 }
@@ -74,7 +88,7 @@ function hook_config_translation_info_alter(&$info) {
   // up on the translation screen. (Form alter in the elements whose values are
   // stored in this config file using regular form altering on the original
   // configuration form.)
-  $info['site_information']['names'][] = 'example.site.setting';
+  $info['system.site_information_settings']['names'][] = 'example.site.setting';
 }
 
 /**

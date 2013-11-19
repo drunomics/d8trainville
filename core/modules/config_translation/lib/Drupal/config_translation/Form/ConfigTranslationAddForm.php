@@ -7,8 +7,7 @@
 
 namespace Drupal\config_translation\Form;
 
-use Drupal\config_translation\ConfigMapperInterface;
-use Drupal\Core\Language\Language;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Defines a form controller for adding configuration translations.
@@ -25,8 +24,8 @@ class ConfigTranslationAddForm extends ConfigTranslationFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, ConfigMapperInterface $mapper = NULL, Language $language = NULL) {
-    $form = parent::buildForm($form, $form_state, $mapper, $language);
+  public function buildForm(array $form, array &$form_state, Request $request = NULL, $plugin_id = NULL, $langcode = NULL) {
+    $form = parent::buildForm($form, $form_state, $request, $plugin_id, $langcode);
     $form['#title'] = $this->t('Add @language translation for %label', array(
       '%label' => $this->mapper->getTitle(),
       '@language' => $this->language->name,
