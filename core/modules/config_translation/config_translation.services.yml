@@ -5,8 +5,14 @@ services:
     tags:
       - { name: event_subscriber }
 
-  config_translation.access_check:
-    class: Drupal\config_translation\Access\ConfigNameCheck
+  config_translation.access.overview:
+    class: Drupal\config_translation\Access\ConfigTranslationOverviewAccess
+    arguments: ['@plugin.manager.config_translation.mapper']
+    tags:
+      - { name: access_check }
+
+  config_translation.access.form:
+    class: Drupal\config_translation\Access\ConfigTranslationFormAccess
     arguments: ['@plugin.manager.config_translation.mapper']
     tags:
       - { name: access_check }

@@ -452,7 +452,7 @@ function user_access($string, AccountInterface $account = NULL) {
   if (!isset($account)) {
     // In the installer request session is not set, so we have to fall back
     // to the global $user. In all other cases the session key is preferred.
-    $account = \Drupal::request()->attributes->get('_account') ?: $user;
+    $account = \Drupal::currentUser() ?: $user;
   }
 
   return $account->hasPermission($string);
@@ -781,19 +781,10 @@ function user_menu() {
     'route_name' => 'user.admin_permissions',
     'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/people/roles/add'] = array(
-    'title' => 'Add role',
-    'route_name' => 'user.role_add',
-    'type' => MENU_LOCAL_ACTION,
-  );
 
   $items['admin/people/roles/manage/%user_role'] = array(
     'title' => 'Edit role',
     'route_name' => 'user.role_edit',
-  );
-  $items['admin/people/roles/manage/%user_role/edit'] = array(
-    'title' => 'Edit',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
   // Administration pages.
@@ -859,14 +850,12 @@ function user_menu_breadcrumb_alter(&$active_trail, $item) {
 }
 
 /**
- * Implements hook_menu_link_load().
+ * Implements hook_translated_menu_link_alter().
  */
-function user_menu_link_load($menu_links) {
+function user_translated_menu_link_alter(MenuLink &$menu_link) {
   // Hide the "User account" link for anonymous users.
-  foreach ($menu_links as $link) {
-    if ($link['link_path'] == 'user' && $link['module'] == 'system' && !$GLOBALS['user']->id()) {
-      $link['hidden'] = 1;
-    }
+  if ($menu_link->link_path == 'user' && $menu_link->module == 'system' && \Drupal::currentUser()->isAnonymous()) {
+    $menu_link->hidden = 1;
   }
 }
 
@@ -1272,7 +1261,7 @@ function user_cancel_methods() {
     'user_cancel_delete' => array(
       'title' => t('Delete the account and its content.'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
-      'access' => \Drupal::request()->attributes->get('_account')->hasPermission('administer users'),
+      'access' => \Drupal::currentUser()->hasPermission('administer users'),
     ),
   );
   // Allow modules to customize account cancellation methods.

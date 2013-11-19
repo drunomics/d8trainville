@@ -7,6 +7,7 @@
 
 namespace Drupal\config_translation;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManager;
@@ -17,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Configuration entity mapper.
+ * Configuration mapper for configuration entities.
  */
 class ConfigEntityMapper extends ConfigNamesMapper {
 
@@ -55,7 +56,9 @@ class ConfigEntityMapper extends ConfigNamesMapper {
    * @param string $plugin_id
    *   The config mapper plugin ID.
    * @param array $plugin_definition
-   *   An array of definitions with mapper details.
+   *   An array of plugin information as documented in
+   *   ConfigNamesMapper::__construct() with the following additional keys:
+   *   - entity_type: The name of the entity type this mapper belongs to.
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The configuration factory.
    * @param \Drupal\locale\LocaleConfigManager $locale_config_manager
@@ -74,13 +77,6 @@ class ConfigEntityMapper extends ConfigNamesMapper {
     $this->setType($plugin_definition['entity_type']);
 
     $this->entityManager = $entity_manager;
-
-    // Field instances are grouped by the entity type they are attached to.
-    // Create a useful label from the entity type they are attached to.
-    if ($plugin_definition['entity_type'] == 'field_instance') {
-      $base_entity_type = $this->entityManager->getDefinition($plugin_definition['base_entity_type']);
-      $this->typeLabel = $this->t('@label fields', array('@label' => $base_entity_type['label']));
-    }
   }
 
   /**
@@ -105,6 +101,7 @@ class ConfigEntityMapper extends ConfigNamesMapper {
    * {@inheritdoc}
    */
   public function populateFromRequest(Request $request) {
+    parent::populateFromRequest($request);
     $entity = $request->attributes->get($this->entityType);
     $this->setEntity($entity);
   }
@@ -131,10 +128,6 @@ class ConfigEntityMapper extends ConfigNamesMapper {
 
     $this->entity = $entity;
 
-    // Replace title placeholder with entity label. It is later escaped for
-    // display.
-    $this->pluginDefinition['title'] = $this->t($this->getTitle(), array('!label' => $entity->label()));
-
     // Add the list of configuration IDs belonging to this entity. We add on a
     // possibly existing list of names. This allows modules to alter the entity
     // page with more names if form altering added more configuration to an
@@ -149,7 +142,18 @@ class ConfigEntityMapper extends ConfigNamesMapper {
   /**
    * {@inheritdoc}
    */
-  public function getRouteParameters() {
+  public function getTitle() {
+    // Title based on the entity label. Should be translated for display in the
+    // current page language. The title placeholder is later escaped for
+    // display.
+    $entity_type_info = $this->entityManager->getDefinition($this->entityType);
+    return $this->t($this->pluginDefinition['title'], array('!label' => $this->entity->label(), '!entity_type' => Unicode::strtolower($entity_type_info['label'])));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBaseRouteParameters() {
     return array($this->entityType => $this->entity->id());
   }
 
@@ -197,14 +201,6 @@ class ConfigEntityMapper extends ConfigNamesMapper {
    * {@inheritdoc}
    */
   public function getTypeLabel() {
-    // The typeLabel is used to override the default entity type label in
-    // configuration translation UI. It is used to distinguish field instances
-    // from each other, but also can easily override in other mapper
-    // implementations.
-    if (isset($this->typeLabel)) {
-      return $this->typeLabel;
-    }
-
     $entityType = $this->entityManager->getDefinition($this->entityType);
     return $entityType['label'];
   }
@@ -219,6 +215,23 @@ class ConfigEntityMapper extends ConfigNamesMapper {
         'href' => 'admin/config/regional/config-translation/' . $this->getPluginId(),
       ),
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContextualLinkGroup() {
+    // @todo Contextual groups do not map to entity types in a predictable
+    //   way. See https://drupal.org/node/2134841 to make them predictable.
+    switch ($this->entityType) {
+      case 'menu':
+      case 'block':
+        return $this->entityType;
+      case 'view':
+        return 'views_ui_edit';
+      default:
+        return NULL;
+    }
   }
 
 }

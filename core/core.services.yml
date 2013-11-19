@@ -264,7 +264,7 @@ services:
       - [setFinalMatcher, ['@router.matcher.final_matcher']]
   url_generator:
     class: Drupal\Core\Routing\UrlGenerator
-    arguments: ['@router.route_provider', '@path_processor_manager', '@config.factory', '@settings']
+    arguments: ['@router.route_provider', '@path_processor_manager', '@route_processor_manager', '@config.factory', '@settings']
     calls:
       - [setRequest, ['@?request']]
       - [setContext, ['@?router.request_context']]
@@ -387,7 +387,7 @@ services:
     arguments: ['@http_kernel', '@controller_resolver', '@string_translation', '@title_resolver']
   controller.dialog:
     class: Drupal\Core\Controller\DialogController
-    arguments: ['@http_kernel']
+    arguments: ['@http_kernel', '@title_resolver']
   router_listener:
     class: Symfony\Component\HttpKernel\EventListener\RouterListener
     tags:
@@ -407,7 +407,7 @@ services:
     class: Drupal\Core\Access\CsrfTokenGenerator
     arguments: ['@private_key']
     calls:
-      - [setRequest, ['@?request']]
+      - [setCurrentUser, ['@?current_user']]
   access_manager:
     class: Drupal\Core\Access\AccessManager
     arguments: ['@router.route_provider', '@url_generator', '@paramconverter_manager']
@@ -449,6 +449,11 @@ services:
     arguments: ['@controller_resolver']
     tags:
       - { name: access_check }
+  access_check.csrf:
+    class: Drupal\Core\Access\CsrfAccessCheck
+    tags:
+      - { name: access_check }
+    arguments: ['@csrf_token']
   maintenance_mode_subscriber:
     class: Drupal\Core\EventSubscriber\MaintenanceModeSubscriber
     tags:
@@ -507,6 +512,8 @@ services:
     tags:
       - { name: event_subscriber }
     arguments: [['@exception_controller', execute]]
+  route_processor_manager:
+    class: Drupal\Core\RouteProcessor\RouteProcessorManager
   path_processor_manager:
     class: Drupal\Core\PathProcessor\PathProcessorManager
   path_processor_decode:
@@ -525,6 +532,11 @@ services:
       - { name: path_processor_inbound, priority: 100 }
       - { name: path_processor_outbound, priority: 300 }
     arguments: ['@path.alias_manager']
+  route_processor_csrf:
+    class: Drupal\Core\Access\RouteProcessorCsrf
+    tags:
+      - { name: route_processor_outbound }
+    arguments: ['@csrf_token']
   transliteration:
     class: Drupal\Core\Transliteration\PHPTransliteration
   flood:
@@ -629,6 +641,11 @@ services:
     class: Zend\Feed\Writer\Extension\Threading\Renderer\Entry
   feed.writer.wellformedwebrendererentry:
     class: Zend\Feed\Writer\Extension\WellFormedWeb\Renderer\Entry
+  theme.registry:
+    class: Drupal\Core\Theme\Registry
+    arguments: ['@cache.cache', '@lock', '@module_handler']
+    tags:
+      - { name: needs_destruction }
   authentication:
     class: Drupal\Core\Authentication\AuthenticationManager
   authentication.cookie:

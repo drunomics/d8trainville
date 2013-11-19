@@ -39,7 +39,10 @@ class RouteSubscriber extends RouteSubscriberBase {
   public function routes(RouteCollection $collection) {
     $mappers = $this->mapperManager->getMappers();
     foreach ($mappers as $mapper) {
-      $collection->add($mapper->getRouteName(), $mapper->getRoute());
+      $collection->add($mapper->getOverviewRouteName(), $mapper->getOverviewRoute());
+      $collection->add($mapper->getAddRouteName(), $mapper->getAddRoute());
+      $collection->add($mapper->getEditRouteName(), $mapper->getEditRoute());
+      $collection->add($mapper->getDeleteRouteName(), $mapper->getDeleteRoute());
     }
   }
 

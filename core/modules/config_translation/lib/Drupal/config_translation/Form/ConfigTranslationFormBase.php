@@ -8,6 +8,7 @@
 namespace Drupal\config_translation\Form;
 
 use Drupal\config_translation\ConfigMapperInterface;
+use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\Schema\Element;
 use Drupal\Core\Config\TypedConfigManager;
@@ -17,6 +18,8 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\Language;
 use Drupal\locale\StringStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Provides a base form for configuration translations.
@@ -29,6 +32,13 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
    * @var \Drupal\Core\Config\TypedConfigManager
    */
   protected $typedConfigManager;
+
+  /**
+   * The configuration mapper manager.
+   *
+   * @var \Drupal\config_translation\ConfigMapperManagerInterface
+   */
+  protected $configMapperManager;
 
   /**
    * String translation storage object.
@@ -77,13 +87,16 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
    *
    * @param \Drupal\Core\Config\TypedConfigManager $typed_config_manager
    *   The typed configuration manager.
+   * @param \Drupal\config_translation\ConfigMapperManagerInterface $config_mapper_manager
+   *   The configuration mapper manager.
    * @param \Drupal\locale\StringStorageInterface $locale_storage
    *   The translation storage object.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler to invoke the alter hook.
    */
-  public function __construct(TypedConfigManager $typed_config_manager, StringStorageInterface $locale_storage, ModuleHandlerInterface $module_handler) {
+  public function __construct(TypedConfigManager $typed_config_manager, ConfigMapperManagerInterface $config_mapper_manager, StringStorageInterface $locale_storage, ModuleHandlerInterface $module_handler) {
     $this->typedConfigManager = $typed_config_manager;
+    $this->configMapperManager = $config_mapper_manager;
     $this->localeStorage = $locale_storage;
     $this->moduleHandler = $module_handler;
   }
@@ -94,6 +107,7 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.typed'),
+      $container->get('plugin.manager.config_translation.mapper'),
       $container->get('locale.storage'),
       $container->get('module_handler')
     );
@@ -116,15 +130,30 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
    *   An associative array containing the structure of the form.
    * @param array $form_state
    *   An associative array containing the current state of the form.
-   * @param \Drupal\config_translation\ConfigMapperInterface $mapper
-   *   The configuration mapper the form is being built for.
-   * @param \Drupal\Core\Language\Language $language
-   *   The language the form is adding or editing.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   Page request object.
+   * @param string $plugin_id
+   *   The plugin ID of the mapper.
+   * @param string $langcode
+   *   The language code of the language the form is adding or editing.
    *
    * @return array
    *   The form structure.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   Throws an exception if the language code provided as a query parameter in
+   *   the request does not match an active language.
    */
-  public function buildForm(array $form, array &$form_state, ConfigMapperInterface $mapper = NULL, Language $language = NULL) {
+  public function buildForm(array $form, array &$form_state, Request $request = NULL, $plugin_id = NULL, $langcode = NULL) {
+    /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
+    $mapper = $this->configMapperManager->createInstance($plugin_id);
+    $mapper->populateFromRequest($request);
+
+    $language = language_load($langcode);
+    if (!$language) {
+      throw new NotFoundHttpException();
+    }
+
     $this->mapper = $mapper;
     $this->language = $language;
     $this->sourceLanguage = $this->mapper->getLanguageWithFallback();
@@ -149,6 +178,8 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
     $form_state['config_translation_language'] = $this->language;
     $form_state['config_translation_source_language'] = $this->sourceLanguage;
 
+    $form['#attached']['library'][] = array('config_translation', 'drupal.config_translation.admin');
+
     $form['config_names'] = array(
       '#type' => 'container',
       '#tree' => TRUE,
@@ -158,7 +189,6 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
       $form['config_names'][$name] += $this->buildConfigForm($this->typedConfigManager->get($name), $this->config($name)->get(), $this->baseConfigData[$name]);
     }
 
-    $form['#attached']['library'][] = array('config_translation', 'drupal.config_translation.admin');
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -202,7 +232,10 @@ abstract class ConfigTranslationFormBase extends FormBase implements BaseFormIdI
 
     config_context_leave();
 
-    $form_state['redirect'] = $this->mapper->getBasePath() . '/translate';
+    $form_state['redirect_route'] = array(
+      'route_name' => $this->mapper->getOverviewRoute(),
+      'route_parameters' => $this->mapper->getOverviewRouteParameters(),
+    );
   }
 
   /**

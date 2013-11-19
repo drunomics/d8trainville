@@ -8,12 +8,15 @@
 namespace Drupal\config_translation\Form;
 
 use Drupal\config_translation\ConfigMapperInterface;
+use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Language\Language;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Builds a form to delete configuration translation.
@@ -26,6 +29,13 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
    * @var \Drupal\Core\Config\StorageInterface $config_storage
    */
   protected $configStorage;
+
+  /**
+   * The configuration mapper manager.
+   *
+   * @var \Drupal\config_translation\ConfigMapperManagerInterface
+   */
+  protected $configMapperManager;
 
   /**
    * The module handler.
@@ -53,10 +63,14 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
    *
    * @param \Drupal\Core\Config\StorageInterface $config_storage
    *   The configuration storage.
+   * @param \Drupal\config_translation\ConfigMapperManagerInterface $config_mapper_manager
+   *   The configuration mapper manager.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
-  public function __construct(StorageInterface $config_storage, ModuleHandlerInterface $module_handler) {
+  public function __construct(StorageInterface $config_storage, ConfigMapperManagerInterface $config_mapper_manager, ModuleHandlerInterface $module_handler) {
     $this->configStorage = $config_storage;
+    $this->configMapperManager = $config_mapper_manager;
     $this->moduleHandler = $module_handler;
   }
 
@@ -66,6 +80,7 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.storage'),
+      $container->get('plugin.manager.config_translation.mapper'),
       $container->get('module_handler')
     );
   }
@@ -89,8 +104,8 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
    */
   public function getCancelRoute() {
     return array(
-      'route_name' => $this->mapper->getRouteName(),
-      'route_parameters' => $this->mapper->getRouteParameters(),
+      'route_name' => $this->mapper->getOverviewRouteName(),
+      'route_parameters' => $this->mapper->getOverviewRouteParameters(),
     );
   }
 
@@ -104,7 +119,16 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, ConfigMapperInterface $mapper = NULL, Language $language = NULL) {
+  public function buildForm(array $form, array &$form_state, Request $request = NULL, $plugin_id = NULL, $langcode = NULL) {
+    /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
+    $mapper = $this->configMapperManager->createInstance($plugin_id);
+    $mapper->populateFromRequest($request);
+
+    $language = language_load($langcode);
+    if (!$language) {
+      throw new NotFoundHttpException();
+    }
+
     $this->mapper = $mapper;
     $this->language = $language;
     return parent::buildForm($form, $form_state);
@@ -127,7 +151,11 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
     }
 
     drupal_set_message($this->t('@language translation of %label was deleted', array('%label' => $this->mapper->getTitle(), '@language' => $this->language->name)));
-    $form_state['redirect'] = $this->mapper->getBasePath() . '/translate';
+
+    $form_state['redirect_route'] = array(
+      'route_name' => $this->mapper->getOverviewRoute(),
+      'route_parameters' => $this->mapper->getOverviewRouteParameters(),
+    );
   }
 
 }

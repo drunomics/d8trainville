@@ -237,37 +237,6 @@ class EntityType extends Plugin {
   public $route_base_path;
 
   /**
-   * The base menu router path to which the entity admin user interface responds.
-   *
-   * It can be used to generate UI links and to attach additional router items
-   * to the entity UI in a generic fashion.
-   *
-   * @var string (optional)
-   */
-  public $menu_base_path;
-
-  /**
-   * The menu router path to be used to view the entity.
-   *
-   * @var string (optional)
-   */
-  public $menu_view_path;
-
-  /**
-   * The menu router path to be used to edit the entity.
-   *
-   * @var string (optional)
-   */
-  public $menu_edit_path;
-
-  /**
-   * A string identifying the menu loader in the router path.
-   *
-   * @var string (optional)
-   */
-  public $menu_path_wildcard;
-
-  /**
    * Link templates using the URI template syntax.
    *
    * Links are an array of standard link relations to the URI template that
@@ -298,9 +267,7 @@ class EntityType extends Plugin {
    *
    * @var array
    */
-  public $links = array(
-    'canonical' => '/entity/{entityType}/{id}',
-  );
+  public $links = array();
 
   /**
    * Specifies whether a module exposing permissions for the current entity type

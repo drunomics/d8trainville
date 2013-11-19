@@ -60,18 +60,15 @@ class ConfigTranslationLocalTasks extends DerivativeBase implements ContainerDer
    */
   public function getDerivativeDefinitions(array $base_plugin_definition) {
     $mappers = $this->mapperManager->getMappers();
-    foreach ($mappers as $mapper) {
+    foreach ($mappers as $plugin_id => $mapper) {
       /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
-      $route_name = $mapper->getRouteName();
+      $route_name = $mapper->getOverviewRouteName();
       $this->derivatives[$route_name] = $base_plugin_definition;
-
-      // @todo Convert this to title and placeholder once the core issue at
-      //   https://drupal.org/node/2120235 is fixed.
-      $this->derivatives[$route_name]['title'] = 'Translate ' . Unicode::strtolower($mapper->getTypeName());
-
+      $this->derivatives[$route_name]['config_translation_plugin_id'] = $plugin_id;
+      $this->derivatives[$route_name]['class'] = '\Drupal\config_translation\Plugin\Menu\LocalTask\ConfigTranslationLocalTask';
       $this->derivatives[$route_name]['route_name'] = $route_name;
     }
-    return $this->derivatives;
+    return parent::getDerivativeDefinitions($base_plugin_definition);
   }
 
   /**
@@ -81,12 +78,9 @@ class ConfigTranslationLocalTasks extends DerivativeBase implements ContainerDer
     $mappers = $this->mapperManager->getMappers();
     foreach ($mappers as $mapper) {
       /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
-      $route_name = $mapper->getRouteName();
+      $route_name = $mapper->getOverviewRouteName();
       $translation_tab = $this->basePluginId . ':' . $route_name;
-      // The config translation routes are based on the base route with a
-      // prefix prepended.
-      $tab_root_route_name = str_replace('config_translation.item.', '', $route_name);
-      $tab_root_id = $this->getTaskFromRoute($tab_root_route_name, $local_tasks);
+      $tab_root_id = $this->getTaskFromRoute($mapper->getBaseRouteName(), $local_tasks);
       if (!empty($tab_root_id)) {
         $local_tasks[$translation_tab]['tab_root_id'] = $tab_root_id;
       }

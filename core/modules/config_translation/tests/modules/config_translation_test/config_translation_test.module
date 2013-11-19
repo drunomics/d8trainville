@@ -19,11 +19,11 @@ function config_translation_test_entity_info_alter(&$info) {
  */
 function config_translation_test_config_translation_info_alter(&$info) {
   if (\Drupal::state()->get('config_translation_test_config_translation_info_alter')) {
-    // Limit people config files to only one of them.
-    $info['people']['names'] = array('user.settings');
+    // Limit account settings config files to only one of them.
+    $info['user.account_settings']['names'] = array('user.settings');
 
     // Add one more config file to the site information page.
-    $info['site_information']['names'][] = 'system.rss';
+    $info['system.site_information_settings']['names'][] = 'system.rss';
   }
 }
 

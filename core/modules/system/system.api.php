@@ -669,7 +669,7 @@ function hook_menu_local_actions_alter(&$local_actions) {
  * @see \Drupal\Core\Menu\LocalTaskInterface
  * @see \Drupal\Core\Menu\LocalTaskManager
  */
-function hook_local_task_alter(&$local_tasks) {
+function hook_local_tasks_alter(&$local_tasks) {
   // Remove a specified local task plugin.
   unset($local_tasks['example_plugin_id']);
 }
@@ -1362,7 +1362,7 @@ function hook_theme($existing, $type, $theme, $path) {
  *
  * The $theme_registry array is keyed by theme hook name, and contains the
  * information returned from hook_theme(), as well as additional properties
- * added by _theme_process_registry().
+ * added by \Drupal\Core\Theme\Registry::processExtension().
  *
  * For example:
  * @code
@@ -1385,7 +1385,7 @@ function hook_theme($existing, $type, $theme, $path) {
  *   The entire cache of theme registry information, post-processing.
  *
  * @see hook_theme()
- * @see _theme_process_registry()
+ * @see \Drupal\Core\Theme\Registry::processExtension()
  */
 function hook_theme_registry_alter(&$theme_registry) {
   // Kill the next/previous forum topic navigation links.
