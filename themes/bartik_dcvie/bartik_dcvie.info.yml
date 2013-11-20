@@ -1,0 +1,39 @@
+name: Bartik subtheme
+type: theme
+description: An example subtheme
+package: Core
+core: 8.x
+
+base theme: bartik
+
+stylesheets:
+  all:
+    - css/layout.css
+
+#  stylesheets-remove:
+#    - system.theme.css
+#    - user.icons.css
+
+#ckeditor_stylesheets:
+#  - css/ckeditor-iframe.css
+
+# Override a CSS file:
+#stylesheets-override:
+#  - filenameiwannaoverwrite.css
+
+regions:
+  header: Header
+  logo: Logo
+  menu: Menu
+  messages: Messages
+  social: Social
+  featured: featured
+  content_pre: Content Pre
+  content: Content
+  content_post: Content post
+  footer: Footer
+
+settings:
+#  shortcut_module_link: '0'
+
+# engine: phptemplate //if you dont like progress ;)
