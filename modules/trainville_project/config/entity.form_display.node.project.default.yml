@@ -1,0 +1,29 @@
+id: node.project.default
+targetEntityType: node
+bundle: project
+mode: default
+content:
+  field_description:
+    type: text_textarea_with_summary
+    weight: '1'
+    settings:
+      rows: '9'
+      summary_rows: '3'
+      placeholder: ''
+  field_tags:
+    type: taxonomy_autocomplete
+    weight: '2'
+    settings:
+      size: '60'
+      autocomplete_route_name: taxonomy.autocomplete
+      placeholder: ''
+  field_screenshots:
+    type: image_image
+    weight: '3'
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+  title:
+    weight: '0'
+    visible: true
+status: true

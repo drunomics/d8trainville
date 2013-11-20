@@ -1,0 +1,6 @@
+id: node.project.teaser
+targetEntityType: node
+bundle: project
+mode: teaser
+content: {  }
+status: true

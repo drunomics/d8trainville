@@ -1,0 +1,15 @@
+id: node.project.field_description
+status: true
+langcode: en
+entity_type: node
+bundle: project
+label: Description
+description: ''
+required: 1
+default_value: {  }
+default_value_function: ''
+settings:
+  text_processing: '1'
+  display_summary: 0
+field_type: text_with_summary
+field_name: field_description

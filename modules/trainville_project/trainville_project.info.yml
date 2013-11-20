@@ -1,0 +1,6 @@
+name: 'Trainville projects'
+type: module
+description: 'A project content type and related configuration.'
+package: Features
+version: 8.x-1.0
+core: 8.x

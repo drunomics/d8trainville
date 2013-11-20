@@ -1,0 +1,17 @@
+type: project
+name: Project
+description: 'Some kind of project.'
+help: ''
+has_title: true
+title_label: 'Title'
+settings:
+  node:
+    preview: '0'
+    options:
+      status: status
+      promote: promote
+      sticky: 0
+      revision: 0
+    submitted: 1
+status: true
+langcode: en

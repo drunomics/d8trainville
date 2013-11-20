@@ -1,0 +1,13 @@
+id: node.project.field_tags
+status: true
+langcode: en
+entity_type: node
+bundle: project
+label: Tags
+description: ''
+required: 0
+default_value: {  }
+default_value_function: ''
+settings: {  }
+field_type: taxonomy_term_reference
+field_name: field_tags

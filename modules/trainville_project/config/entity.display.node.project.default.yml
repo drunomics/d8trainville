@@ -1,0 +1,23 @@
+id: node.project.default
+targetEntityType: node
+bundle: project
+mode: default
+content:
+  field_description:
+    weight: 0
+    label: above
+    settings: {  }
+    type: text_default
+  field_tags:
+    weight: 1
+    label: above
+    settings: {  }
+    type: taxonomy_term_reference_link
+  field_screenshots:
+    weight: 2
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    type: image
+status: true
